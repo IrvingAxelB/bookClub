@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 
-class User extends Component {
+class Signup extends Component {
     state = {
         firstName: '',
         lastName: '',
@@ -17,16 +17,16 @@ class User extends Component {
     handleSubmit = (e) => {
         console.log('state', this.state);
     };
-    async createAccount () {
+    createAccount () {
         const { email, password } = this.state;
-        await firebase.auth().createUserWithEmailAndPassword(email, password).catch(function(error) {
-            var errorCode = error.code;
-            var errorMessage = error.message;
-            this.setState({
-                errorCode,
-                errorMessage,
-            });
-        });
+        // firebase.auth().createUserWithEmailAndPassword(email, password).catch(function(error) {
+        //     var errorCode = error.code;
+        //     var errorMessage = error.message;
+        //     this.setState({
+        //         errorCode,
+        //         errorMessage,
+        //     });
+        // });
     };
     render() {
         return (
@@ -71,4 +71,4 @@ class User extends Component {
     }
 }
 
-export default User;
+export default Signup;
