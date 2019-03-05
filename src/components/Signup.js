@@ -1,48 +1,73 @@
 import React, { Component } from 'react';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
+import { withFirebase } from './Firebase';
+import {withRouter} from "react-router-dom";
 
-class Signup extends Component {
-    state = {
-        firstName: '',
-        lastName: '',
-        email: '',
-        password: '',
-        errorCode: '',
-        errorMessage: '',
-    }
+const INITIAL_STATE = {
+    username: '',
+    email: '',
+    passwordOne: '',
+    passwordTwo: '',
+    password: '',
+    errorCode: null,
+    errorMessage: null,
+};
+
+class SignUpFormBase extends Component {
+    state = { ...INITIAL_STATE };
     handleChange = name => event => {
         this.setState({ [name]: event.target.value });
     };
-    handleSubmit = (e) => {
-        console.log('state', this.state);
-    };
-    createAccount () {
-        const { email, password } = this.state;
-        // firebase.auth().createUserWithEmailAndPassword(email, password).catch(function(error) {
-        //     var errorCode = error.code;
-        //     var errorMessage = error.message;
-        //     this.setState({
-        //         errorCode,
-        //         errorMessage,
-        //     });
-        // });
+    onSubmit = event => {
+        const { username, email, passwordOne } = this.state;
+        const THAT = this;
+
+        this.props.firebase
+            .doCreateUserWithEmailAndPassword(email, passwordOne)
+            .then(authUser => {
+                return this.props.firebase
+                    .usersCollection(authUser.user.uid)
+                    .set({
+                        username,
+                        email,
+                        profile_image : '',
+                    }).then(() => {
+                        THAT.setState({ ...INITIAL_STATE });
+                        THAT.props.history.push('/');
+                    })
+                    .catch((error) => {
+                        console.error("Error adding document: ", error);
+                    });
+            })
+            .catch(error => {
+                this.setState({ error });
+            });
+
+        event.preventDefault();
     };
     render() {
+        const {
+            error,
+            username,
+            email,
+            passwordOne,
+            passwordTwo,
+        } = this.state;
+
+        const isInvalid =
+            passwordOne !== passwordTwo ||
+            passwordOne === '' ||
+            email === '' ||
+            username === '';
+
         return (
-            <form>
+            <form onSubmit={this.onSubmit}>
                 <TextField
                     required
-                    label="First Name"
-                    value={this.state.name}
-                    onChange={this.handleChange('firstNane')}
-                    margin="normal"
-                />
-                <TextField
-                    required
-                    label="Last Name"
-                    value={this.state.lastName}
-                    onChange={this.handleChange('lastName')}
+                    label="User Name"
+                    value={this.state.username}
+                    onChange={this.handleChange('username')}
                     margin="normal"
                 />
                 <TextField
@@ -58,17 +83,29 @@ class Signup extends Component {
                     required
                     label="Password"
                     type="password"
-                    autoComplete="current-password"
-                    value={this.state.password}
-                    onChange={this.handleChange('password')}
+                    value={this.state.passwordOne}
+                    onChange={this.handleChange('passwordOne')}
                     margin="normal"
                 />
-                <Button variant="contained" onClick={this.handleSubmit}>
+                <TextField
+                    required
+                    label="Confirm Password"
+                    type="password"
+                    value={this.state.passwordTwo}
+                    onChange={this.handleChange('passwordTwo')}
+                    margin="normal"
+                />
+                <Button
+                    variant="contained"
+                    type="submit"
+                    disabled={isInvalid}
+                >
                     Sign Up
                 </Button>
+                {error && <p>{error.message}</p>}
             </form>
         );
     }
 }
 
-export default Signup;
+export default withRouter(withFirebase(SignUpFormBase));

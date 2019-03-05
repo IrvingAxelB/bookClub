@@ -2,7 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { createStyles, withStyles, WithStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
-import { withRouter } from 'react-router-dom'
+import { withRouter } from 'react-router-dom';
+import { withFirebase } from './Firebase';
+import { AuthUserContext } from './Session';
 
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
@@ -28,13 +30,11 @@ const styles = createStyles({
 export interface Props extends WithStyles<typeof styles> {}
 
 export interface State {
-  auth: boolean;
   anchorEl: null | HTMLElement;
 }
 
 class MenuAppBar extends React.Component<Props, State> {
   state: State = {
-    auth: false,
     anchorEl: null,
   };
 
@@ -51,23 +51,24 @@ class MenuAppBar extends React.Component<Props, State> {
   };
 
   displayMenuItems = () => {
-    const { auth } = this.state;
-    const { history } = this.props;
-
-    if (auth) {
-      return (
-          <div onClick={this.handleClose}>
-            <MenuItem onClick={this.handleClose}>Profile</MenuItem>
-            <MenuItem onClick={this.handleClose}>My account</MenuItem>
-          </div>
-      );
-    }
+    const { history, firebase } = this.props;
 
     return (
-        <div onClick={this.handleClose}>
-          <MenuItem onClick={() => { history.push('/signup') }}>Sign Up</MenuItem>
-          <MenuItem onClick={() => { history.push('/login') }}>Login</MenuItem>
-        </div>
+        <AuthUserContext.Consumer>
+          {authUser =>
+              authUser ? (
+                  <div onClick={this.handleClose}>
+                    <MenuItem onClick={this.handleClose}>Profile</MenuItem>
+                    <MenuItem onClick={firebase.doSignOut}>Logout</MenuItem>
+                  </div>
+              ) : (
+              <div onClick={this.handleClose}>
+                <MenuItem onClick={() => { history.push('/signup') }}>Sign Up</MenuItem>
+                <MenuItem onClick={() => { history.push('/login') }}>Login</MenuItem>
+              </div>
+            )
+          }
+        </AuthUserContext.Consumer>
     );
   }
 
@@ -121,4 +122,4 @@ MenuAppBar.propTypes = {
   classes: PropTypes.object.isRequired,
 };
 
-export default withRouter(withStyles(styles)(MenuAppBar))
+export default withFirebase(withRouter(withStyles(styles)(MenuAppBar)));

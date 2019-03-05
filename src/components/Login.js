@@ -1,34 +1,39 @@
 import React, { Component } from 'react';
+import { withFirebase } from './Firebase';
+import { withRouter } from "react-router-dom";
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 
+const INITIAL_STATE = {
+    email: '',
+    password: '',
+    error: null,
+};
+
 class Login extends Component {
-    state = {
-        email: '',
-        password: '',
-        errorCode: '',
-        errorMessage: '',
-    }
+    state = { ...INITIAL_STATE };
+    onSubmit = event => {
+        const { email, password } = this.state;
+
+        this.props.firebase
+            .doSignInWithEmailAndPassword(email, password)
+            .then(() => {
+                this.setState({ ...INITIAL_STATE });
+                this.props.history.push('/');
+            })
+            .catch(error => {
+                this.setState({ error });
+            });
+
+        event.preventDefault();
+    };
+
     handleChange = name => event => {
         this.setState({ [name]: event.target.value });
     };
-    handleSubmit = (e) => {
-        console.log('state', this.state);
-    };
-    createAccount () {
-        const { email, password } = this.state;
-        // firebase.auth().createUserWithEmailAndPassword(email, password).catch(function(error) {
-        //     var errorCode = error.code;
-        //     var errorMessage = error.message;
-        //     this.setState({
-        //         errorCode,
-        //         errorMessage,
-        //     });
-        // });
-    };
     render() {
         return (
-            <form>
+            <form onSubmit={this.onSubmit}>
                 <TextField
                     required
                     label="Email"
@@ -47,7 +52,7 @@ class Login extends Component {
                     onChange={this.handleChange('password')}
                     margin="normal"
                 />
-                <Button variant="contained" onClick={this.handleSubmit}>
+                <Button variant="contained" type="submit">
                     Login
                 </Button>
             </form>
@@ -55,4 +60,4 @@ class Login extends Component {
     }
 }
 
-export default Login;
+export default withRouter(withFirebase(Login));
