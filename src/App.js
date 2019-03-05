@@ -12,7 +12,6 @@ class App extends Component {
           <Route path="/" exact component={Dashboard} />
           <Route path="/users/" component={Dashboard} />
           <Route path="/summary" component={Dashboard} />
-        </div>
       </Router>
     );
   }
