@@ -1,30 +1,19 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
-import Button from '@material-ui/core/Button';
-import './App.css';
+import { BrowserRouter as Router, Route } from "react-router-dom";
+import Dashboard from "./containers/Dashboard";
+import Header from "./components/Header";
 
 class App extends Component {
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <Button variant="contained" color="primary">
-            Hello World
-          </Button>
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
+      <Router>
+        <div>
+          <Header />
+          <Route path="/" exact component={Dashboard} />
+          <Route path="/users/" component={Dashboard} />
+          <Route path="/summary" component={Dashboard} />
+        </div>
+      </Router>
     );
   }
 }
