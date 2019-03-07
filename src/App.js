@@ -1,18 +1,15 @@
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Route } from "react-router-dom";
-import Dashboard from "./containers/Dashboard";
-import Header from "./components/Header";
+import Firebase, { FirebaseContext } from './components/Firebase';
+import Navigation from './components/Navigation';
 
 class App extends Component {
   render() {
     return (
       <Router>
-        <div>
-          <Header />
-          <Route path="/" exact component={Dashboard} />
-          <Route path="/users/" component={Dashboard} />
-          <Route path="/summary" component={Dashboard} />
-        </div>
+        <FirebaseContext.Provider value={new Firebase()}>
+          <Navigation />
+        </FirebaseContext.Provider>
       </Router>
     );
   }
